@@ -1,19 +1,10 @@
 {
   "name": "libtris",
   "license": "MIT",
-  "version": "0.0.2",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js"
-    }
-  },
+  "version": "0.0.3",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
     "release": "yarn build && changeset publish",
@@ -29,8 +20,7 @@
     "clean": true,
     "outDir": "dist",
     "entry": [
-      "src/index.ts",
-      "src/utils/index.ts"
+      "src/index.ts"
     ],
     "format": [
       "esm",

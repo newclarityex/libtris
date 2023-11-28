@@ -4,8 +4,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "ES2022",
+    "moduleDetection": "force",
     "strict": true,
     "moduleResolution": "Node16",
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "lib": ["es2022"]
   }
 }
