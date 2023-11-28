@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "module": "Node16",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "ES2022",
+    "target": "es2022",
+    "allowJs": true,
     "moduleDetection": "force",
     "strict": true,
-    "moduleResolution": "Node16",
     "noUncheckedIndexedAccess": true,
-    "lib": ["es2022"]
+    "moduleResolution": "NodeNext",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "rootDir": "src"
   }
 }

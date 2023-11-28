@@ -1,5 +1,6 @@
 import shuffle from "shuffle-array";
-import { DEFAULT_BOARD_OPTIONS, BoardOptions, DEFAULT_SCORE_OPTIONS, ScoreOptions } from "../index";
+import type { BoardOptions, ScoreOptions } from "./index";
+import { DEFAULT_BOARD_OPTIONS, DEFAULT_SCORE_OPTIONS } from "./index";
 
 export type Piece = 'I' | 'O' | 'J' | 'L' | 'S' | 'Z' | 'T';
 export type Block = Piece | null | 'G';

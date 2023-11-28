@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { createGameState, hardDrop, moveLeft, moveRight, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index'
-import { Block, renderBoard } from './utils';
+import { renderBoard } from './utils';
+import type { Block } from './utils';
 
 describe('game', () => {
     test('can sonic drop', () => {
