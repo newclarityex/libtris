@@ -1,0 +1,49 @@
+{
+  "name": "libtris",
+  "license": "MIT",
+  "version": "0.0.1",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "release": "yarn build && changeset publish",
+    "lint": "tsc",
+    "test": "vitest -w"
+  },
+  "tsup": {
+    "dts": true,
+    "minify": true,
+    "sourcemap": true,
+    "treeshake": true,
+    "splitting": true,
+    "clean": true,
+    "outDir": "dist",
+    "entry": [
+      "src/index.ts",
+      "src/utils/index.ts"
+    ],
+    "format": [
+      "esm",
+      "cjs"
+    ]
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.0",
+    "@types/shuffle-array": "^1.0.5",
+    "typescript": "^4.9.4",
+    "vitest": "^0.34.6"
+  },
+  "dependencies": {
+    "shuffle-array": "^1.0.1"
+  }
+}

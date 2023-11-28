@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "strict": true,
+    "moduleResolution": "Node16",
+    "noUncheckedIndexedAccess": true
+  }
+}
