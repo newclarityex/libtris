@@ -1,6 +1,6 @@
 import shuffle from "shuffle-array";
-import type { BoardOptions, ScoreOptions } from "./index";
-import { DEFAULT_BOARD_OPTIONS, DEFAULT_SCORE_OPTIONS } from "./index";
+import type { Options } from "./index";
+import { DEFAULT_OPTIONS } from "./index";
 
 export type Piece = 'I' | 'O' | 'J' | 'L' | 'S' | 'Z' | 'T';
 export type Block = Piece | null | 'G';
@@ -123,14 +123,14 @@ export function tryWallKicks(board: Block[][], pieceData: PieceData, rotation: 0
 }
 
 
-export function checkCollision(board: Block[][], pieceData: PieceData, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS) {
+export function checkCollision(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS) {
     const pieceMatrix = getPieceMatrix(pieceData.piece, pieceData.rotation);
 
     for (let pieceY = 0; pieceY < pieceMatrix.length; pieceY++) {
         for (let pieceX = 0; pieceX < pieceMatrix[0]!.length; pieceX++) {
             const boardX = pieceData.x + pieceX;
             const boardY = pieceData.y - pieceY;
-            if (pieceMatrix[pieceY]![pieceX] && (boardX < 0 || boardX >= boardOptions.width || boardY < 0 || board[boardY] && board[boardY]![boardX])) {
+            if (pieceMatrix[pieceY]![pieceX] && (boardX < 0 || boardX >= options.boardWidth || boardY < 0 || board[boardY] && board[boardY]![boardX])) {
                 return true;
             }
         }
@@ -139,28 +139,28 @@ export function checkCollision(board: Block[][], pieceData: PieceData, boardOpti
     return false;
 }
 
-export function checkImmobile(board: Block[][], pieceData: PieceData, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): boolean {
+export function checkImmobile(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS): boolean {
     // Check collision for up, down, left, right
-    if (!checkCollision(board, { ...pieceData, y: pieceData.y - 1 }, boardOptions)) {
+    if (!checkCollision(board, { ...pieceData, y: pieceData.y - 1 }, options)) {
         console.log("UP")
         return false;
     }
-    if (!checkCollision(board, { ...pieceData, y: pieceData.y + 1 }, boardOptions)) {
+    if (!checkCollision(board, { ...pieceData, y: pieceData.y + 1 }, options)) {
         console.log("DOWN")
         return false;
     }
-    if (!checkCollision(board, { ...pieceData, x: pieceData.x - 1 }, boardOptions)) {
+    if (!checkCollision(board, { ...pieceData, x: pieceData.x - 1 }, options)) {
         console.log("LEFT")
         return false;
     }
-    if (!checkCollision(board, { ...pieceData, x: pieceData.x + 1 }, boardOptions)) {
+    if (!checkCollision(board, { ...pieceData, x: pieceData.x + 1 }, options)) {
         console.log("RIGHT")
         return false;
     }
     return true;
 }
 
-export function placePiece(board: Block[][], pieceData: PieceData, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): Block[][] {
+export function placePiece(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS): Block[][] {
     const pieceMatrix = getPieceMatrix(pieceData.piece, pieceData.rotation);
     const newBoard = board.map(row => [...row]);
 
@@ -170,7 +170,7 @@ export function placePiece(board: Block[][], pieceData: PieceData, boardOptions:
             const boardY = pieceData.y - pieceY;
             if (pieceMatrix[pieceY]![pieceX]) {
                 while (boardY > newBoard.length - 1) {
-                    newBoard.push(new Array(boardOptions.width).fill(null));
+                    newBoard.push(new Array(options.boardWidth).fill(null));
                 }
                 newBoard[boardY]![boardX] = pieceMatrix[pieceY]![pieceX]!;
             }
@@ -203,14 +203,14 @@ export function calculateScore(scoreData: {
     isImmobile: boolean;
     b2b: boolean;
     combo: number;
-}, scoreOptions: ScoreOptions = DEFAULT_SCORE_OPTIONS): {
+}, options: Options = DEFAULT_OPTIONS): {
     score: number;
     b2b: boolean;
     combo: number;
     attackName: string | null;
 } {
     const { linesCleared, isImmobile, b2b, combo, pc } = scoreData;
-    const { attackTable, comboTable } = scoreOptions;
+    const { attackTable, comboTable } = options;
 
     let score = 0;
     let isB2bClear = false;

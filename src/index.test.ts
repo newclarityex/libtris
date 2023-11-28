@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { createGameState, hardDrop, moveLeft, moveRight, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index'
-import { renderBoard } from './utils';
+import { addGarbage, createGameState, hardDrop, moveLeft, moveRight, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index'
 import type { Block } from './utils';
 
 describe('game', () => {
@@ -58,8 +57,13 @@ describe('game', () => {
         gameState = sonicDrop(gameState);
         gameState = rotateCounterClockwise(gameState);
         const { gameState: newGameState, score, attackName } = hardDrop(gameState);
-        renderBoard(newGameState.board)
         expect(score).toBe(4);
         expect(attackName).toBe('All-Spin Double');
+    })
+    test('can add garbage', () => {
+        let gameState = createGameState();
+        gameState = addGarbage(gameState, 4);
+        expect(gameState.board[0]?.some(block => block === "G")).toBe(true);
+        expect(gameState.board[3]?.some(block => block === "G")).toBe(true);
     })
 })

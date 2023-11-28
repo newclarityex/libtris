@@ -14,17 +14,11 @@ export type GameState = {
     dead: boolean;
 }
 
-export type BoardOptions = {
-    width: number;
-    height: number;
-}
+export type Options = {
+    boardWidth: number;
+    boardHeight: number;
+    garbageMessiness: number;
 
-export const DEFAULT_BOARD_OPTIONS: BoardOptions = {
-    width: 10,
-    height: 20,
-}
-
-export type ScoreOptions = {
     attackTable: {
         'single': number;
         'double': number;
@@ -39,7 +33,10 @@ export type ScoreOptions = {
     comboTable: number[];
 }
 
-export const DEFAULT_SCORE_OPTIONS: ScoreOptions = {
+export const DEFAULT_OPTIONS: Options = {
+    boardWidth: 10,
+    boardHeight: 20,
+    garbageMessiness: 0.2,
     attackTable: {
         'single': 0,
         'double': 1,
@@ -54,11 +51,11 @@ export const DEFAULT_SCORE_OPTIONS: ScoreOptions = {
     comboTable: [0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
 }
 
-function spawnPiece(board: Block[][], piece: Piece, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): PieceData | false {
+function spawnPiece(board: Block[][], piece: Piece, options: Options = DEFAULT_OPTIONS): PieceData | false {
     const pieceData: PieceData = {
         piece,
-        x: Math.floor(boardOptions.width / 2) - Math.ceil(PIECE_MATRICES[piece][0]!.length / 2),
-        y: boardOptions.height,
+        x: Math.floor(options.boardWidth / 2) - Math.ceil(PIECE_MATRICES[piece][0]!.length / 2),
+        y: options.boardHeight,
         rotation: 0,
     };
 
@@ -92,7 +89,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
     };
 }
 
-type Commands = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold';
+type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold';
 type Event = {
     type: 'attack';
     payload: {
@@ -102,32 +99,37 @@ type Event = {
 } | {
     type: 'game_over';
 }
-export function executeCommand(gameState: GameState, command: Commands, scoreOptions: ScoreOptions = DEFAULT_SCORE_OPTIONS, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): {
+export function executeCommand(gameState: GameState, command: Command, options: Partial<Options> = {}): {
     gameState: GameState;
     events: Event[];
 } {
+    const finalOptions = {
+        ...DEFAULT_OPTIONS,
+        ...options,
+    };
+
     switch (command) {
         case 'move_left': {
             return {
-                gameState: moveLeft(gameState, boardOptions),
+                gameState: moveLeft(gameState, finalOptions),
                 events: [],
             };
         }
         case 'move_right': {
             return {
-                gameState: moveRight(gameState, boardOptions),
+                gameState: moveRight(gameState, finalOptions),
                 events: [],
             };
         }
         case 'sonic_left': {
             return {
-                gameState: sonicLeft(gameState, boardOptions),
+                gameState: sonicLeft(gameState, finalOptions),
                 events: [],
             };
         }
         case 'sonic_right': {
             return {
-                gameState: sonicRight(gameState, boardOptions),
+                gameState: sonicRight(gameState, finalOptions),
                 events: [],
             };
         }
@@ -144,7 +146,7 @@ export function executeCommand(gameState: GameState, command: Commands, scoreOpt
             };
         }
         case 'hard_drop': {
-            const { gameState: newGameState, score, attackName } = hardDrop(gameState, scoreOptions, boardOptions);
+            const { gameState: newGameState, score, attackName } = hardDrop(gameState, finalOptions);
             const events: Event[] = [];
             if (attackName) {
                 events.push({
@@ -193,15 +195,20 @@ export function executeCommand(gameState: GameState, command: Commands, scoreOpt
     }
 }
 
-export function executeCommands(gameState: GameState, commands: Commands[], scoreOptions: ScoreOptions = DEFAULT_SCORE_OPTIONS, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): {
+export function executeCommands(gameState: GameState, commands: Command[], options: Partial<Options> = {}): {
     gameState: GameState;
     events: Event[];
 } {
+    const finalOptions = {
+        ...DEFAULT_OPTIONS,
+        ...options,
+    };
+
     let newGameState = gameState;
     const events: Event[] = [];
 
     for (const command of commands) {
-        const { gameState: newNewGameState, events: newEvents } = executeCommand(newGameState, command, scoreOptions, boardOptions);
+        const { gameState: newNewGameState, events: newEvents } = executeCommand(newGameState, command, finalOptions);
         newGameState = newNewGameState;
         events.push(...newEvents);
     }
@@ -212,41 +219,41 @@ export function executeCommands(gameState: GameState, commands: Commands[], scor
     };
 }
 
-export function moveLeft(gameState: GameState, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): GameState {
+export function moveLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
     const { current, board } = newGameState;
 
     current.x -= 1;
-    if (checkCollision(board, current, boardOptions)) {
+    if (checkCollision(board, current, options)) {
         current.x += 1;
     }
 
     return newGameState;
 }
 
-export function moveRight(gameState: GameState, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): GameState {
+export function moveRight(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
     const { current, board } = newGameState;
 
     current.x += 1;
-    if (checkCollision(board, current, boardOptions)) {
+    if (checkCollision(board, current, options)) {
         current.x -= 1;
     }
 
     return newGameState;
 }
 
-export function sonicRight(gameState: GameState, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): GameState {
+export function sonicRight(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
     const { current, board } = newGameState;
 
-    while (!checkCollision(board, current, boardOptions)) {
+    while (!checkCollision(board, current, options)) {
         current.x += 1;
     }
     current.x -= 1;
@@ -254,13 +261,13 @@ export function sonicRight(gameState: GameState, boardOptions: BoardOptions = DE
     return newGameState;
 }
 
-export function sonicLeft(gameState: GameState, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): GameState {
+export function sonicLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
     const { current, board } = newGameState;
 
-    while (!checkCollision(board, current, boardOptions)) {
+    while (!checkCollision(board, current, options)) {
         current.x -= 1;
     }
     current.x += 1;
@@ -296,7 +303,7 @@ export function sonicDrop(gameState: GameState): GameState {
     return newGameState;
 }
 
-export function hardDrop(gameState: GameState, scoreOptions: ScoreOptions = DEFAULT_SCORE_OPTIONS, boardOptions: BoardOptions = DEFAULT_BOARD_OPTIONS): {
+export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTIONS): {
     gameState: GameState;
     score: number;
     attackName: string | null;
@@ -310,7 +317,7 @@ export function hardDrop(gameState: GameState, scoreOptions: ScoreOptions = DEFA
     }
     newGameState.current.y += 1;
 
-    newGameState.board = placePiece(newGameState.board, newGameState.current, boardOptions);
+    newGameState.board = placePiece(newGameState.board, newGameState.current, options);
 
     const { board: clearedBoard, cleared } = clearLines(newGameState.board);
     newGameState.board = clearedBoard;
@@ -323,7 +330,7 @@ export function hardDrop(gameState: GameState, scoreOptions: ScoreOptions = DEFA
         isImmobile: newGameState.isImmobile,
         b2b: newGameState.b2b,
         combo: newGameState.combo,
-    }, scoreOptions);
+    }, options);
 
     newGameState.combo = combo;
     newGameState.b2b = b2b;
@@ -418,6 +425,25 @@ export function hold(gameState: GameState): GameState {
     newGameState.held = newHeld;
     newGameState.canHold = false;
     newGameState.isImmobile = checkImmobile(board, newGameState.current);
+
+    return newGameState;
+}
+
+export function addGarbage(gameState: GameState, lines: number, options: Options = DEFAULT_OPTIONS): GameState {
+    const newGameState = structuredClone(gameState);
+    const { board } = newGameState;
+
+    let lastHole: number | null = null;
+    for (let i = 0; i < lines; i++) {
+        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
+        if (lastHole === null) {
+            lastHole = Math.floor(Math.random() * line.length);
+        } else if (Math.random() < options.garbageMessiness) {
+            lastHole = Math.floor(Math.random() * line.length);
+        }
+        line[lastHole] = null;
+        board.unshift(line);
+    }
 
     return newGameState;
 }
