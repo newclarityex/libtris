@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { addGarbage, createGameState, hardDrop, moveLeft, moveRight, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index'
-import type { Block } from './utils';
+import { renderBoard, type Block } from './utils';
 
 describe('game', () => {
     test('can sonic drop', () => {
@@ -53,10 +53,12 @@ describe('game', () => {
         ];
         tspinSetup.reverse();
         gameState.board = tspinSetup;
+        gameState = moveRight(gameState);
         gameState = rotateCounterClockwise(gameState);
         gameState = sonicDrop(gameState);
         gameState = rotateCounterClockwise(gameState);
         const { gameState: newGameState, score, attackName } = hardDrop(gameState);
+        renderBoard(newGameState.board);
         expect(score).toBe(4);
         expect(attackName).toBe('All-Spin Double');
     })

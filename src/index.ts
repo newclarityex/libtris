@@ -381,7 +381,7 @@ export function rotateCounterClockwise(gameState: GameState): GameState {
     const { current, board } = newGameState;
 
     const initialRotation = current.rotation;
-    const newRotation = (current.rotation + 1) % 4 as 0 | 1 | 2 | 3;
+    const newRotation = (current.rotation + 3) % 4 as 0 | 1 | 2 | 3;
 
     const wallKickData = tryWallKicks(board, current, newRotation);
     if (wallKickData.success) {

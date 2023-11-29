@@ -102,20 +102,21 @@ export function getPieceMatrix(piece: Piece, rotation: 0 | 1 | 2 | 3) {
 }
 
 export function tryWallKicks(board: Block[][], pieceData: PieceData, rotation: 0 | 1 | 2 | 3): { pieceData: PieceData, success: boolean } {
-    const newPieceData = { ...pieceData };
+    const newPieceData = { ...pieceData, rotation };
     const wallKicks = newPieceData.piece === 'I' ? I_WALLKICKS : WALLKICKS;
 
     const kickData = wallKicks[`${pieceData.rotation}-${rotation}`]!;
+
     for (const [x, y] of kickData) {
         newPieceData.x += x;
         newPieceData.y += y;
         if (!checkCollision(board, newPieceData)) {
-            newPieceData.rotation = rotation;
             return { pieceData: newPieceData, success: true };
         }
         newPieceData.x -= x;
         newPieceData.y -= y;
     }
+
     return {
         pieceData: newPieceData,
         success: false,
@@ -142,19 +143,15 @@ export function checkCollision(board: Block[][], pieceData: PieceData, options: 
 export function checkImmobile(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS): boolean {
     // Check collision for up, down, left, right
     if (!checkCollision(board, { ...pieceData, y: pieceData.y - 1 }, options)) {
-        console.log("UP")
         return false;
     }
     if (!checkCollision(board, { ...pieceData, y: pieceData.y + 1 }, options)) {
-        console.log("DOWN")
         return false;
     }
     if (!checkCollision(board, { ...pieceData, x: pieceData.x - 1 }, options)) {
-        console.log("LEFT")
         return false;
     }
     if (!checkCollision(board, { ...pieceData, x: pieceData.x + 1 }, options)) {
-        console.log("RIGHT")
         return false;
     }
     return true;
