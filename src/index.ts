@@ -1,9 +1,10 @@
 import type { Block, Piece, PieceData } from './utils';
-import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc } from './utils';
+import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage } from './utils';
 
 export type GameState = {
     board: Block[][];
     queue: Piece[];
+    garbageQueue: number[];
     held: Piece | null;
     current: PieceData;
     isImmobile: boolean;
@@ -78,6 +79,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
     return {
         board,
         queue,
+        garbageQueue: [],
         held: null,
         current,
         isImmobile: false,
@@ -219,6 +221,19 @@ export function executeCommands(gameState: GameState, commands: Command[], optio
     };
 }
 
+
+export function queueGarbage(gameState: GameState, holeIndices: number[], options: Partial<Options> = {}): GameState {
+    const finalOptions = {
+        ...DEFAULT_OPTIONS,
+        ...options,
+    };
+
+    let newGameState = structuredClone(gameState);
+    newGameState.garbageQueue.push(...holeIndices);
+
+    return newGameState;
+}
+
 export function moveLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
@@ -336,12 +351,17 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     newGameState.b2b = b2b;
     newGameState.score += score;
 
+    newGameState.board = addGarbage(newGameState.board, newGameState.garbageQueue, options);
+    newGameState.garbageQueue = [];
+
     const newPiece = spawnPiece(newGameState.board, newGameState.queue.shift()!);
     if (!newPiece) {
         newGameState.dead = true;
     } else {
         newGameState.current = newPiece;
     }
+
+    newGameState.canHold = true;
 
     if (newGameState.queue.length < 6) {
         newGameState.queue.push(...generateBag());
@@ -429,21 +449,4 @@ export function hold(gameState: GameState): GameState {
     return newGameState;
 }
 
-export function addGarbage(gameState: GameState, lines: number, options: Options = DEFAULT_OPTIONS): GameState {
-    const newGameState = structuredClone(gameState);
-    const { board } = newGameState;
-
-    let lastHole: number | null = null;
-    for (let i = 0; i < lines; i++) {
-        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
-        if (lastHole === null) {
-            lastHole = Math.floor(Math.random() * line.length);
-        } else if (Math.random() < options.garbageMessiness) {
-            lastHole = Math.floor(Math.random() * line.length);
-        }
-        line[lastHole] = null;
-        board.unshift(line);
-    }
-
-    return newGameState;
-}
+export { generateGarbage } from './utils';

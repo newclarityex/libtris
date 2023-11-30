@@ -285,6 +285,33 @@ export function calculateScore(scoreData: {
     }
 }
 
+export function generateGarbage(damage: number, options: Options = DEFAULT_OPTIONS) {
+    const holeIndices = [];
+    let holeIndex: number | null = null;
+
+    for (let i = 0; i < damage; i++) {
+        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
+        if (holeIndex === null) {
+            holeIndex = Math.floor(Math.random() * line.length);
+        } else if (Math.random() < options.garbageMessiness) {
+            holeIndex = Math.floor(Math.random() * line.length);
+        }
+        holeIndices.push(holeIndex);
+    }
+
+    return holeIndices;
+}
+
+export function addGarbage(board: Block[][], holeIndices: number[], options: Options = DEFAULT_OPTIONS) {
+    const newBoard = board.map(row => [...row]);
+    for (const holeIndex of holeIndices) {
+        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
+        line[holeIndex] = null;
+        newBoard.unshift(line);
+    }
+    return newBoard;
+}
+
 export function renderBoard(board: Block[][]) {
     const renderedBoard = board.map(row => row.map(block => block ? block : ' ').join(''));
     renderedBoard.reverse();
