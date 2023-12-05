@@ -177,17 +177,25 @@ export function placePiece(board: Block[][], pieceData: PieceData, options: Opti
     return newBoard;
 }
 
-export function clearLines(board: Block[][]): { board: Block[][], cleared: number } {
-    let cleared = 0;
+export function clearLines(board: Block[][]): {
+    board: Block[][], clearedLines: {
+        height: number;
+        blocks: Block[];
+    }[]
+} {
+    let clearedLines = [];
     let newBoard = board.map(row => [...row]);
     for (let i = newBoard.length - 1; i >= 0; i--) {
         if (newBoard[i]!.every(block => block !== null)) {
-            cleared++;
+            clearedLines.push({
+                height: i,
+                blocks: newBoard[i]!,
+            });
             newBoard.splice(i, 1);
         }
     }
     newBoard = newBoard.filter(row => row.some(block => block !== null));
-    return { board: newBoard, cleared };
+    return { board: newBoard, clearedLines };
 }
 
 export function checkPc(board: Block[][]): boolean {
