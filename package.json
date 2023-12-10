@@ -1,7 +1,7 @@
 {
   "name": "libtris",
   "license": "MIT",
-  "version": "0.0.16",
+  "version": "0.0.23",
   "files": [
     "dist",
     "package.json"
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "release": "yarn build && changeset publish",
+    "release": "yarn build && yarn publish",
     "lint": "tsc",
     "test": "vitest -w"
   },

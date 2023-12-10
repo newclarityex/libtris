@@ -148,16 +148,18 @@ export type GameEvent = {
 } | {
     type: 'clear';
     payload: {
-        lines: {
+        clearName: string;
+        allSpin: boolean;
+        b2b: boolean;
+        combo: number;
+        pc: boolean;
+        attack: number;
+        cancelled: number;
+        piece: PieceData;
+        clearedLines: {
             height: number;
             blocks: Block[];
         }[];
-    };
-} | {
-    type: 'attack';
-    payload: {
-        attackName: string;
-        lines: number;
     };
 } | {
     type: 'game_over';
@@ -210,7 +212,7 @@ export function executeCommand(gameState: GameState, command: Command, options: 
         }
         case 'hard_drop': {
             const initialPieceState = structuredClone(gameState.current);
-            const { gameState: newGameState, score, attackName, clearedLines, tankedLines, finalPieceState } = hardDrop(gameState, finalOptions);
+            const { gameState: newGameState, score, clear, tankedLines, finalPieceState } = hardDrop(gameState, finalOptions);
             const events: GameEvent[] = [];
             events.push({
                 type: 'piece_placed',
@@ -219,21 +221,10 @@ export function executeCommand(gameState: GameState, command: Command, options: 
                     final: finalPieceState,
                 },
             });
-            if (attackName) {
-                events.push({
-                    type: 'attack',
-                    payload: {
-                        attackName,
-                        lines: score,
-                    },
-                });
-            }
-            if (clearedLines.length > 0) {
+            if (clear) {
                 events.push({
                     type: 'clear',
-                    payload: {
-                        lines: clearedLines,
-                    },
+                    payload: clear,
                 });
             }
             if (tankedLines.length > 0) {
@@ -401,11 +392,20 @@ export function sonicDrop(gameState: GameState): GameState {
 export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTIONS): {
     gameState: GameState;
     score: number;
-    attackName: string | null;
-    clearedLines: {
-        height: number;
-        blocks: Block[];
-    }[];
+    clear: {
+        clearName: string;
+        b2b: boolean;
+        combo: number;
+        pc: boolean;
+        cancelled: number;
+        attack: number;
+        piece: PieceData;
+        allSpin: boolean;
+        clearedLines: {
+            height: number;
+            blocks: Block[];
+        }[];
+    } | null;
     tankedLines: number[];
     finalPieceState: PieceData;
 } {
@@ -428,7 +428,7 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
 
     const pc = checkPc(clearedBoard);
 
-    const { score, b2b, combo, attackName } = calculateScore({
+    const { score, b2b, combo, clearName, allSpin } = calculateScore({
         pc,
         linesCleared: cleared,
         isImmobile: newGameState.isImmobile,
@@ -439,6 +439,13 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     newGameState.combo = combo;
     newGameState.b2b = b2b;
     newGameState.score += score;
+
+    let attack = score;
+    let cancelled = 0;
+    while (newGameState.garbageQueue.length > 0 && attack > 0) {
+        newGameState.garbageQueue.shift();
+        attack -= 1;
+    }
 
     const tankedLines = [];
     if (cleared === 0) {
@@ -460,9 +467,18 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     return {
         gameState: newGameState,
         score,
-        attackName,
+        clear: clearName ? {
+            clearName,
+            b2b,
+            combo,
+            pc,
+            attack,
+            cancelled,
+            piece: finalPieceState,
+            allSpin,
+            clearedLines,
+        } : null,
         tankedLines,
-        clearedLines,
         finalPieceState
     };
 }
@@ -543,3 +559,4 @@ export function hold(gameState: GameState): GameState {
 }
 
 export { generateGarbage, getPieceMatrix } from './utils';
+export type { PieceData } from './utils';

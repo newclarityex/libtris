@@ -39,9 +39,9 @@ describe('game', () => {
         gameState = rotateClockwise(gameState);
         gameState = sonicDrop(gameState);
         gameState = rotateClockwise(gameState);
-        const { gameState: newGameState, score, attackName } = hardDrop(gameState);
+        const { gameState: newGameState, score, clear } = hardDrop(gameState);
         expect(score).toBe(4);
-        expect(attackName).toBe('All-Spin Double');
+        expect(clear?.clearName).toBe('All-Spin Double');
     })
     test('can tspin wallkick', () => {
         let gameState = createGameState(["T"]);
@@ -57,9 +57,9 @@ describe('game', () => {
         gameState = rotateCounterClockwise(gameState);
         gameState = sonicDrop(gameState);
         gameState = rotateCounterClockwise(gameState);
-        const { gameState: newGameState, score, attackName } = hardDrop(gameState);
+        const { gameState: newGameState, score, clear } = hardDrop(gameState);
         expect(score).toBe(4);
-        expect(attackName).toBe('All-Spin Double');
+        expect(clear?.clearName).toBe('All-Spin Double');
     })
     test('can add garbage', () => {
         let gameState = createGameState();
