@@ -329,3 +329,32 @@ export function renderBoard(board: Block[][]) {
     renderedBoard.reverse();
     console.log(renderedBoard.join('\n'));
 }
+
+export function getBoardHeights(board: Block[][], options: Options = DEFAULT_OPTIONS) {
+    if (board.length === 0) return new Array(options.boardWidth).fill(0);
+
+    const heights = [];
+    for (let x = 0; x < options.boardWidth; x++) {
+        let y = board.length - 1;
+        while (y >= 0 && board[y]![x] === null) {
+            y--;
+        }
+        heights.push(y + 1);
+    }
+
+    return heights;
+}
+
+export function getBoardBumpiness(board: Block[][], options: Options = DEFAULT_OPTIONS) {
+    const heights = getBoardHeights(board, options);
+    const avgHeight = getBoardAvgHeight(board, options);
+    const variance = heights.map(h => (h - avgHeight) ** 2).reduce((a, b) => a + b, 0) / heights.length;
+    const stdDev = Math.sqrt(variance);
+    return stdDev;
+}
+
+export function getBoardAvgHeight(board: Block[][], options: Options = DEFAULT_OPTIONS) {
+    const heights = getBoardHeights(board, options);
+    const avgHeight = heights.reduce((a, b) => a + b, 0) / heights.length;
+    return avgHeight;
+}
