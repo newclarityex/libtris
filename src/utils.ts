@@ -280,7 +280,8 @@ export function calculateScore(scoreData: {
     }
 
     if (newCombo > 0) {
-        score += comboTable[newCombo - 1]!;
+        let comboIndex = Math.min(newCombo - 1, comboTable.length - 1);
+        score += comboTable[comboIndex]!;
     }
 
     if (pc) {
