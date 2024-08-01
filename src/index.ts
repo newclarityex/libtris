@@ -137,6 +137,7 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
     };
 }
 
+export type ClearName = 'Single' | 'Triple' | 'Double' | 'Quad' | 'Perfect Clear' | 'All-Spin Single' | 'All-Spin Double' | 'All-Spin Triple';
 export type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold';
 export type GameEvent = {
     type: 'piece_placed';
@@ -152,7 +153,7 @@ export type GameEvent = {
 } | {
     type: 'clear';
     payload: {
-        clearName: string;
+        clearName: ClearName;
         allSpin: boolean;
         b2b: boolean;
         combo: number;
@@ -397,7 +398,7 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     gameState: GameState;
     score: number;
     clear: {
-        clearName: string;
+        clearName: ClearName;
         b2b: boolean;
         combo: number;
         pc: boolean;

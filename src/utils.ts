@@ -1,5 +1,5 @@
 import shuffle from "shuffle-array";
-import type { Options } from "./index";
+import type { ClearName, Options } from "./index";
 import { DEFAULT_OPTIONS } from "./index";
 
 export type Piece = 'I' | 'O' | 'J' | 'L' | 'S' | 'Z' | 'T';
@@ -209,7 +209,7 @@ export function calculateScore(scoreData: {
     b2b: boolean;
     combo: number;
 }, options: Options = DEFAULT_OPTIONS): {
-    clearName: string | null;
+    clearName: ClearName | null;
     score: number;
     b2b: boolean;
     combo: number;
@@ -230,7 +230,7 @@ export function calculateScore(scoreData: {
     };
 
     let newCombo = combo + 1;
-    let clearName: string | null = null;
+    let clearName: ClearName | null = null;
     let allSpin = false;
 
     if (isImmobile) {
