@@ -280,7 +280,7 @@ export function calculateScore(scoreData: {
     }
 
     if (newCombo > 0) {
-        score += comboTable[newCombo]!;
+        score += comboTable[newCombo - 1]!;
     }
 
     if (pc) {
