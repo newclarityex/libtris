@@ -217,7 +217,7 @@ export function executeCommand(gameState: GameState, command: Command, options: 
         }
         case 'hard_drop': {
             const initialPieceState = structuredClone(gameState.current);
-            const { gameState: newGameState, score, clear, tankedLines, finalPieceState } = hardDrop(gameState, finalOptions);
+            const { gameState: newGameState, clear, tankedLines, finalPieceState } = hardDrop(gameState, finalOptions);
             const events: GameEvent[] = [];
             events.push({
                 type: 'piece_placed',
@@ -396,8 +396,8 @@ export function sonicDrop(gameState: GameState): GameState {
 
 export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTIONS): {
     gameState: GameState;
-    score: number;
     clear: {
+        score: number;
         clearName: ClearName;
         b2b: boolean;
         combo: number;
@@ -451,6 +451,7 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     while (newGameState.garbageQueue.length > 0 && attack > 0) {
         newGameState.garbageQueue.shift();
         attack -= 1;
+        cancelled += 1;
     }
 
     const tankedLines = [];
@@ -472,8 +473,8 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
 
     return {
         gameState: newGameState,
-        score,
         clear: clearName ? {
+            score,
             clearName,
             b2b,
             combo,
