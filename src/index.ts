@@ -566,5 +566,5 @@ export function hold(gameState: GameState): GameState {
     return newGameState;
 }
 
-export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardBumpiness } from './utils';
+export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils';
 export type { PieceData, Block } from './utils';
