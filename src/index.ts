@@ -526,7 +526,7 @@ export function hold(gameState: GameState): GameState {
 
     newGameState.held = newHeld;
     newGameState.canHold = false;
-    newGameState.isImmobile = checkImmobile(board, newGameState.current);
+    newGameState.isImmobile = false;
 
     return newGameState;
 }

@@ -61,6 +61,43 @@ describe('game', () => {
         expect(clear?.score).toBe(4);
         expect(clear?.clearName).toBe('All-Spin Double');
     })
+    test('can ospin', () => {
+        let gameState = createGameState(["O"]);
+        const oSpinSetup: Block[][] = [
+            [null, null, null, null, "G", "G", null, null, null, null],
+            ["G", "G", "G", "G", null, null, "G", "G", "G", "G"],
+            ["G", "G", "G", "G", null, null, "G", "G", "G", "G"],
+            [null, null, null, null, "G", "G", null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+        ];
+        oSpinSetup.reverse();
+        gameState.board = oSpinSetup;
+        let spinGameState = rotateCounterClockwise(gameState);
+        const { clear: spinClear } = hardDrop(spinGameState);
+        expect(spinClear?.score).toBe(4);
+        expect(spinClear?.clearName).toBe('All-Spin Double');
+
+        const { clear: spinless } = hardDrop(gameState);
+        expect(spinless?.score).toBe(1);
+        expect(spinless?.clearName).toBe('Double');
+    })
     test('can add garbage', () => {
         let gameState = createGameState();
         const garbageIndices = generateGarbage(4);
