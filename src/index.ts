@@ -1,5 +1,8 @@
-import type { Block, Piece, PieceData } from './utils';
-import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage } from './utils';
+import type { Block, Piece, PieceData } from './utils.js';
+import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage } from './utils.js';
+import type { Options } from './config.js';
+import { DEFAULT_OPTIONS } from './config.js';
+import type { ClearName } from './utils.js';
 
 export type GameState = {
     board: Block[][];
@@ -29,43 +32,6 @@ export type PublicGameState = {
     score: number;
     piecesPlaced: number;
     dead: boolean;
-}
-
-export type Options = {
-    boardWidth: number;
-    boardHeight: number;
-    garbageMessiness: number;
-
-    attackTable: {
-        'single': number;
-        'double': number;
-        'triple': number;
-        'quad': number;
-        'asd': number;
-        'ass': number;
-        'ast': number;
-        'pc': number;
-        'b2b': number;
-    };
-    comboTable: number[];
-}
-
-export const DEFAULT_OPTIONS: Options = {
-    boardWidth: 10,
-    boardHeight: 20,
-    garbageMessiness: 0.05,
-    attackTable: {
-        'single': 0,
-        'double': 1,
-        'triple': 2,
-        'quad': 4,
-        'asd': 4,
-        'ass': 2,
-        'ast': 6,
-        'pc': 10,
-        'b2b': 1,
-    },
-    comboTable: [0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
 }
 
 
@@ -137,7 +103,6 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
     };
 }
 
-export type ClearName = 'Single' | 'Triple' | 'Double' | 'Quad' | 'Perfect Clear' | 'All-Spin Single' | 'All-Spin Double' | 'All-Spin Triple';
 export type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold';
 export type GameEvent = {
     type: 'piece_placed';
@@ -566,5 +531,7 @@ export function hold(gameState: GameState): GameState {
     return newGameState;
 }
 
-export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils';
-export type { PieceData, Block } from './utils';
+export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils.js';
+export type { PieceData, Block, ClearName } from './utils.js';
+export type { Options } from './config.js';
+export { DEFAULT_OPTIONS } from './config.js';

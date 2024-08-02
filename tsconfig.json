@@ -2,13 +2,15 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "es2022",
+    "target": "ES6",
     "allowJs": true,
     "moduleDetection": "force",
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "moduleResolution": "NodeNext",
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "lib": ["es6"],
     "rootDir": "src"
-  }
+  },
+  "exclude": ["dist"]
 }

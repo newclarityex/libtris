@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { createGameState, hardDrop, moveLeft, moveRight, queueGarbage, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index'
-import { renderBoard, type Block, generateGarbage } from './utils';
+import { createGameState, hardDrop, moveLeft, moveRight, queueGarbage, rotateClockwise, rotateCounterClockwise, sonicDrop, sonicLeft } from './index.js'
+import { renderBoard, type Block, generateGarbage } from './utils.js';
 
 describe('game', () => {
     test('can sonic drop', () => {
@@ -39,8 +39,8 @@ describe('game', () => {
         gameState = rotateClockwise(gameState);
         gameState = sonicDrop(gameState);
         gameState = rotateClockwise(gameState);
-        const { gameState: newGameState, score, clear } = hardDrop(gameState);
-        expect(score).toBe(4);
+        const { gameState: newGameState, clear } = hardDrop(gameState);
+        expect(clear?.score).toBe(4);
         expect(clear?.clearName).toBe('All-Spin Double');
     })
     test('can tspin wallkick', () => {
@@ -57,8 +57,8 @@ describe('game', () => {
         gameState = rotateCounterClockwise(gameState);
         gameState = sonicDrop(gameState);
         gameState = rotateCounterClockwise(gameState);
-        const { gameState: newGameState, score, clear } = hardDrop(gameState);
-        expect(score).toBe(4);
+        const { gameState: newGameState, clear } = hardDrop(gameState);
+        expect(clear?.score).toBe(4);
         expect(clear?.clearName).toBe('All-Spin Double');
     })
     test('can add garbage', () => {
