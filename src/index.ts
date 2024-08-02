@@ -153,6 +153,7 @@ export type GameEvent = {
 } | {
     type: 'clear';
     payload: {
+        score: number;
         clearName: ClearName;
         allSpin: boolean;
         b2b: boolean;
