@@ -25,7 +25,6 @@ export type PublicGameState = {
     garbageQueued: number;
     held: Piece | null;
     current: PieceData;
-    isImmobile: boolean;
     canHold: boolean;
     combo: number;
     b2b: boolean;
@@ -85,7 +84,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
 }
 
 export function getPublicGameState(gameState: GameState): PublicGameState {
-    const { board, queue, garbageQueue, held, current, isImmobile, combo, canHold, b2b, score, piecesPlaced, dead } = gameState;
+    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, score, piecesPlaced, dead } = gameState;
     const newQueue = [...queue].splice(0, 6);
     return {
         board,
@@ -93,7 +92,6 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
         garbageQueued: garbageQueue.length,
         held,
         current,
-        isImmobile,
         combo,
         canHold,
         b2b,
@@ -431,6 +429,7 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
     newGameState.dead = isDead;
     newGameState.current = newPiece;
 
+    newGameState.isImmobile = false;
     newGameState.canHold = true;
 
     if (newGameState.queue.length < 6) {
