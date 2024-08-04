@@ -21,6 +21,11 @@ export type PieceData = {
     rotation: 0 | 1 | 2 | 3;
 }
 
+export type GarbageLine = {
+    index: number;
+    delay: number;
+};
+
 export const PIECE_MATRICES: {
     [key in Piece]: (Piece | null)[][];
 } = {

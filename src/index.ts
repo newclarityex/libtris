@@ -1,13 +1,17 @@
-import type { Block, Piece, PieceData } from './utils.js';
+import type { Block, GarbageLine, Piece, PieceData } from './utils.js';
 import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage } from './utils.js';
 import type { Options } from './config.js';
 import { DEFAULT_OPTIONS } from './config.js';
 import type { ClearName } from './utils.js';
 
+export type PublicGarbageLine = {
+    delay: number;
+};
+
 export type GameState = {
     board: Block[][];
     queue: Piece[];
-    garbageQueue: number[];
+    garbageQueue: GarbageLine[];
     held: Piece | null;
     current: PieceData;
     isImmobile: boolean;
@@ -22,7 +26,7 @@ export type GameState = {
 export type PublicGameState = {
     board: Block[][];
     queue: Piece[];
-    garbageQueued: number;
+    garbageQueued: PublicGarbageLine[];
     held: Piece | null;
     current: PieceData;
     canHold: boolean;
@@ -89,7 +93,7 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
     return {
         board,
         queue: newQueue,
-        garbageQueued: garbageQueue.length,
+        garbageQueued: garbageQueue.map(line => ({ delay: line.delay })),
         held,
         current,
         combo,
@@ -267,12 +271,28 @@ export function executeCommands(gameState: GameState, commands: Command[], optio
 }
 
 
-export function queueGarbage(gameState: GameState, holeIndices: number[]): GameState {
+export function queueGarbage(gameState: GameState, holeIndices: number[], options: Options = DEFAULT_OPTIONS): GameState {
     let newGameState = structuredClone(gameState);
-    newGameState.garbageQueue.push(...holeIndices);
+    let garbageLines = holeIndices.map(index => ({ index, delay: options.garbageDelay }));
+    newGameState.garbageQueue.push(...garbageLines);
 
     return newGameState;
 }
+
+export function processGarbage(gameState: GameState, options: Options = DEFAULT_OPTIONS) {
+    let newGameState = structuredClone(gameState);
+
+    let expiredLines = gameState.garbageQueue.filter(line => line.delay <= 0);
+    let expiredIndices = expiredLines.map(line => line.index);
+    newGameState.board = addGarbage(newGameState.board, expiredIndices);
+    
+    for (const line of gameState.garbageQueue) {
+        line.delay -= 1;
+    };
+
+
+    return { newGameState, expiredIndices };
+};
 
 export function moveLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
@@ -380,7 +400,7 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
 } {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
-    const newGameState = structuredClone(gameState);
+    let newGameState = structuredClone(gameState);
 
     while (!checkCollision(newGameState.board, newGameState.current)) {
         newGameState.current.y -= 1;
@@ -418,12 +438,12 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
         cancelled += 1;
     }
 
-    const tankedLines = [];
+    let tankedLines: number[] = [];
     if (cleared === 0) {
-        newGameState.board = addGarbage(newGameState.board, newGameState.garbageQueue, options);
-        tankedLines.push(...newGameState.garbageQueue);
-        newGameState.garbageQueue = [];
-    }
+        let { newGameState: garbageGameState, expiredIndices } = processGarbage(newGameState, options);
+        newGameState = garbageGameState;
+        tankedLines = expiredIndices;
+    };
 
     const { newPieceData: newPiece, collides: isDead } = spawnPiece(newGameState.board, newGameState.queue.shift()!);
     newGameState.dead = isDead;

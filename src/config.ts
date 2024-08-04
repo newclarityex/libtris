@@ -2,7 +2,7 @@ export type Options = {
     boardWidth: number;
     boardHeight: number;
     garbageMessiness: number;
-
+    garbageDelay: number,
     attackTable: {
         'single': number;
         'double': number;
@@ -21,6 +21,7 @@ export const DEFAULT_OPTIONS: Options = {
     boardWidth: 10,
     boardHeight: 20,
     garbageMessiness: 0.05,
+    garbageDelay: 1,
     attackTable: {
         'single': 0,
         'double': 1,
