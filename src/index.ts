@@ -551,6 +551,6 @@ export function hold(gameState: GameState): GameState {
 }
 
 export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils.js';
-export type { PieceData, Block, ClearName } from './utils.js';
+export type { PieceData, Block, ClearName, GarbageLine } from './utils.js';
 export type { Options } from './config.js';
 export { DEFAULT_OPTIONS } from './config.js';
