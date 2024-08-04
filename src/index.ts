@@ -20,6 +20,7 @@ export type GameState = {
     b2b: boolean;
     score: number;
     piecesPlaced: number;
+    garbageCleared: number;
     dead: boolean;
 }
 
@@ -34,6 +35,7 @@ export type PublicGameState = {
     b2b: boolean;
     score: number;
     piecesPlaced: number;
+    garbageCleared: number;
     dead: boolean;
 }
 
@@ -83,12 +85,13 @@ export function createGameState(initialBag?: Piece[]): GameState {
         b2b: false,
         score: 0,
         piecesPlaced: 0,
+        garbageCleared: 0,
         dead: false,
     };
 }
 
 export function getPublicGameState(gameState: GameState): PublicGameState {
-    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, score, piecesPlaced, dead } = gameState;
+    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, score, piecesPlaced, garbageCleared, dead } = gameState;
     const newQueue = [...queue].splice(0, 6);
     return {
         board,
@@ -101,6 +104,7 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
         b2b,
         score,
         piecesPlaced,
+        garbageCleared,
         dead,
     };
 }
@@ -282,7 +286,9 @@ export function queueGarbage(gameState: GameState, holeIndices: number[], option
 export function processGarbage(gameState: GameState, options: Options = DEFAULT_OPTIONS) {
     let newGameState = structuredClone(gameState);
 
-    let expiredLines = gameState.garbageQueue.filter(line => line.delay <= 0);
+    let expiredLines = newGameState.garbageQueue.filter(line => line.delay <= 0);
+    newGameState.garbageQueue = newGameState.garbageQueue.filter(line => line.delay > 0);
+
     let expiredIndices = expiredLines.map(line => line.index);
     newGameState.board = addGarbage(newGameState.board, expiredIndices);
     
@@ -413,6 +419,12 @@ export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTION
 
     const { board: clearedBoard, clearedLines } = clearLines(newGameState.board);
     const cleared = clearedLines.length;
+    for (const line of clearedLines) {
+        if (line.blocks.some(block => block === "G")) {
+            newGameState.garbageCleared += 1;
+        };
+    };
+
     newGameState.board = clearedBoard;
 
     const pc = checkPc(clearedBoard);
