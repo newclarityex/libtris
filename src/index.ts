@@ -286,7 +286,7 @@ export function processGarbage(gameState: GameState, options: Options = DEFAULT_
     let expiredIndices = expiredLines.map(line => line.index);
     newGameState.board = addGarbage(newGameState.board, expiredIndices);
     
-    for (const line of gameState.garbageQueue) {
+    for (const line of newGameState.garbageQueue) {
         line.delay -= 1;
     };
 
