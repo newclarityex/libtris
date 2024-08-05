@@ -229,7 +229,7 @@ export function calculateScore(scoreData: {
 
     if (linesCleared === 0) return {
         score,
-        b2b: false,
+        b2b: b2b,
         combo: 0,
         clearName: null,
         allSpin: false,
