@@ -92,6 +92,19 @@ const I_WALLKICKS: {
     "0-3": [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
 };
 
+const O_WALLKICKS: {
+    [key: string]: [number, number][];
+} = {
+    "0-1": [[1, -1], [2, -1], [1, -2], [1, 0], [0, 0]],
+    "1-0": [[-1, 1], [-2, 1], [-1, 2], [-1, 0], [0, 0]],
+    "1-2": [[-1, -1], [-2, -1], [-1, -2], [-1, 0], [0, 0]],
+    "2-1": [[1, 1], [2, 1], [1, 2], [1, 0], [0, 0]],
+    "2-3": [[-1, 1], [-2, 1], [-1, 2], [-1, 0], [0, 0]],
+    "3-2": [[1, -1], [2, -1], [1, -2], [1, 0], [0, 0]],
+    "3-0": [[1, 1], [2, 1], [1, 1], [1, 0], [0, 0]],
+    "0-3": [[-1, -1], [-2, -1], [-1, -1], [-1, 0], [0, 0]],
+};
+
 export function rotateMatrix<T>(matrix: T[][], rotation: 0 | 1 | 2 | 3): T[][] {
     let newMatrix = matrix.map(row => [...row]);
     for (let i = 0; i < rotation; i++) {
@@ -109,7 +122,7 @@ export function getPieceMatrix(piece: Piece, rotation: 0 | 1 | 2 | 3) {
 
 export function tryWallKicks(board: Block[][], pieceData: PieceData, rotation: 0 | 1 | 2 | 3): { pieceData: PieceData, success: boolean } {
     const newPieceData = { ...pieceData, rotation };
-    const wallKicks = newPieceData.piece === 'I' ? I_WALLKICKS : WALLKICKS;
+    const wallKicks = newPieceData.piece === 'I' ? I_WALLKICKS : newPieceData.piece === 'O' ? O_WALLKICKS : WALLKICKS;
 
     const kickData = wallKicks[`${pieceData.rotation}-${rotation}`]!;
 
