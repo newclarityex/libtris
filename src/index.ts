@@ -40,14 +40,15 @@ export type PublicGameState = {
 }
 
 
-function spawnPiece(board: Block[][], piece: Piece, options: Options = DEFAULT_OPTIONS): {
+function spawnPiece(board: Block[][], piece: Piece, options: Partial<Options> = {}): {
     newPieceData: PieceData;
     collides: boolean;
 } {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const pieceData: PieceData = {
         piece,
-        x: Math.floor(options.boardWidth / 2) - Math.ceil(PIECE_MATRICES[piece][0]!.length / 2),
-        y: options.boardHeight,
+        x: Math.floor(finalOptions.boardWidth / 2) - Math.ceil(PIECE_MATRICES[piece][0]!.length / 2),
+        y: finalOptions.boardHeight,
         rotation: 0,
     };
 
@@ -275,15 +276,18 @@ export function executeCommands(gameState: GameState, commands: Command[], optio
 }
 
 
-export function queueGarbage(gameState: GameState, holeIndices: number[], options: Options = DEFAULT_OPTIONS): GameState {
+export function queueGarbage(gameState: GameState, holeIndices: number[], options: Partial<Options> = {}): GameState {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
+
     let newGameState = structuredClone(gameState);
-    let garbageLines = holeIndices.map(index => ({ index, delay: options.garbageDelay }));
+    let garbageLines = holeIndices.map(index => ({ index, delay: finalOptions.garbageDelay }));
     newGameState.garbageQueue.push(...garbageLines);
 
     return newGameState;
 }
 
-export function processGarbage(gameState: GameState, options: Options = DEFAULT_OPTIONS) {
+export function processGarbage(gameState: GameState, options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     let newGameState = structuredClone(gameState);
 
     let expiredLines = newGameState.garbageQueue.filter(line => line.delay <= 0);
@@ -291,7 +295,7 @@ export function processGarbage(gameState: GameState, options: Options = DEFAULT_
 
     let expiredIndices = expiredLines.map(line => line.index);
     newGameState.board = addGarbage(newGameState.board, expiredIndices);
-    
+
     for (const line of newGameState.garbageQueue) {
         line.delay -= 1;
     };
@@ -300,7 +304,7 @@ export function processGarbage(gameState: GameState, options: Options = DEFAULT_
     return { newGameState, expiredIndices };
 };
 
-export function moveLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
+export function moveLeft(gameState: GameState, options: Partial<Options> = {}): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
@@ -314,7 +318,7 @@ export function moveLeft(gameState: GameState, options: Options = DEFAULT_OPTION
     return newGameState;
 }
 
-export function moveRight(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
+export function moveRight(gameState: GameState, options: Partial<Options> = {}): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
@@ -328,7 +332,7 @@ export function moveRight(gameState: GameState, options: Options = DEFAULT_OPTIO
     return newGameState;
 }
 
-export function sonicRight(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
+export function sonicRight(gameState: GameState, options: Partial<Options> = {}): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
@@ -342,7 +346,7 @@ export function sonicRight(gameState: GameState, options: Options = DEFAULT_OPTI
     return newGameState;
 }
 
-export function sonicLeft(gameState: GameState, options: Options = DEFAULT_OPTIONS): GameState {
+export function sonicLeft(gameState: GameState, options: Partial<Options> = {}): GameState {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
@@ -384,7 +388,7 @@ export function sonicDrop(gameState: GameState): GameState {
     return newGameState;
 }
 
-export function hardDrop(gameState: GameState, options: Options = DEFAULT_OPTIONS): {
+export function hardDrop(gameState: GameState, options: Partial<Options> = {}): {
     gameState: GameState;
     clear: {
         score: number;

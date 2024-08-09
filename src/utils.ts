@@ -130,14 +130,15 @@ export function tryWallKicks(board: Block[][], pieceData: PieceData, rotation: 0
 }
 
 
-export function checkCollision(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS) {
+export function checkCollision(board: Block[][], pieceData: PieceData, options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const pieceMatrix = getPieceMatrix(pieceData.piece, pieceData.rotation);
 
     for (let pieceY = 0; pieceY < pieceMatrix.length; pieceY++) {
         for (let pieceX = 0; pieceX < pieceMatrix[0]!.length; pieceX++) {
             const boardX = pieceData.x + pieceX;
             const boardY = pieceData.y - pieceY;
-            if (pieceMatrix[pieceY]![pieceX] && (boardX < 0 || boardX >= options.boardWidth || boardY < 0 || board[boardY] && board[boardY]![boardX])) {
+            if (pieceMatrix[pieceY]![pieceX] && (boardX < 0 || boardX >= finalOptions.boardWidth || boardY < 0 || board[boardY] && board[boardY]![boardX])) {
                 return true;
             }
         }
@@ -146,7 +147,7 @@ export function checkCollision(board: Block[][], pieceData: PieceData, options: 
     return false;
 }
 
-export function checkImmobile(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS): boolean {
+export function checkImmobile(board: Block[][], pieceData: PieceData, options: Partial<Options> = {}): boolean {
     // Check collision for up, down, left, right
     if (!checkCollision(board, { ...pieceData, y: pieceData.y - 1 }, options)) {
         return false;
@@ -163,7 +164,7 @@ export function checkImmobile(board: Block[][], pieceData: PieceData, options: O
     return true;
 }
 
-export function placePiece(board: Block[][], pieceData: PieceData, options: Options = DEFAULT_OPTIONS): Block[][] {
+export function placePiece(board: Block[][], pieceData: PieceData, options: Partial<Options> = {}): Block[][] {
     const pieceMatrix = getPieceMatrix(pieceData.piece, pieceData.rotation);
     const newBoard = board.map(row => [...row]);
 
@@ -214,15 +215,16 @@ export function calculateScore(scoreData: {
     isImmobile: boolean;
     b2b: boolean;
     combo: number;
-}, options: Options = DEFAULT_OPTIONS): {
+}, options: Partial<Options> = {}): {
     clearName: ClearName | null;
     score: number;
     b2b: boolean;
     combo: number;
     allSpin: boolean;
 } {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const { linesCleared, isImmobile, b2b, combo, pc } = scoreData;
-    const { attackTable, comboTable } = options;
+    const { attackTable, comboTable } = finalOptions;
 
     let score = 0;
     let isB2bClear = false;
@@ -304,15 +306,16 @@ export function calculateScore(scoreData: {
     }
 }
 
-export function generateGarbage(damage: number, options: Options = DEFAULT_OPTIONS) {
+export function generateGarbage(damage: number, options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const holeIndices = [];
     let holeIndex: number | null = null;
 
     for (let i = 0; i < damage; i++) {
-        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
+        const line: Block[] = Array.from({ length: finalOptions.boardWidth }, () => 'G');
         if (holeIndex === null) {
             holeIndex = Math.floor(Math.random() * line.length);
-        } else if (Math.random() < options.garbageMessiness) {
+        } else if (Math.random() < finalOptions.garbageMessiness) {
             holeIndex = Math.floor(Math.random() * line.length);
         }
         holeIndices.push(holeIndex);
@@ -321,10 +324,11 @@ export function generateGarbage(damage: number, options: Options = DEFAULT_OPTIO
     return holeIndices;
 }
 
-export function addGarbage(board: Block[][], holeIndices: number[], options: Options = DEFAULT_OPTIONS) {
+export function addGarbage(board: Block[][], holeIndices: number[], options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const newBoard = board.map(row => [...row]);
     for (const holeIndex of holeIndices) {
-        const line: Block[] = Array.from({ length: options.boardWidth }, () => 'G');
+        const line: Block[] = Array.from({ length: finalOptions.boardWidth }, () => 'G');
         line[holeIndex] = null;
         newBoard.unshift(line);
     }
@@ -337,11 +341,12 @@ export function renderBoard(board: Block[][]) {
     console.log(renderedBoard.join('\n'));
 }
 
-export function getBoardHeights(board: Block[][], options: Options = DEFAULT_OPTIONS) {
-    if (board.length === 0) return new Array(options.boardWidth).fill(0);
+export function getBoardHeights(board: Block[][], options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
+    if (board.length === 0) return new Array(finalOptions.boardWidth).fill(0);
 
     const heights = [];
-    for (let x = 0; x < options.boardWidth; x++) {
+    for (let x = 0; x < finalOptions.boardWidth; x++) {
         let y = board.length - 1;
         while (y >= 0 && board[y]![x] === null) {
             y--;
@@ -352,7 +357,8 @@ export function getBoardHeights(board: Block[][], options: Options = DEFAULT_OPT
     return heights;
 }
 
-export function getBoardBumpiness(board: Block[][], options: Options = DEFAULT_OPTIONS) {
+export function getBoardBumpiness(board: Block[][], options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const heights = getBoardHeights(board, options);
     const avgHeight = getBoardAvgHeight(board, options);
     const variance = heights.map(h => (h - avgHeight) ** 2).reduce((a, b) => a + b, 0) / heights.length;
@@ -360,7 +366,8 @@ export function getBoardBumpiness(board: Block[][], options: Options = DEFAULT_O
     return stdDev;
 }
 
-export function getBoardAvgHeight(board: Block[][], options: Options = DEFAULT_OPTIONS) {
+export function getBoardAvgHeight(board: Block[][], options: Partial<Options> = {}) {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     const heights = getBoardHeights(board, options);
     const avgHeight = heights.reduce((a, b) => a + b, 0) / heights.length;
     return avgHeight;
