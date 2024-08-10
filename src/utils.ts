@@ -310,7 +310,7 @@ export function calculateScore(scoreData: {
         clearName = 'Perfect Clear';
     }
 
-    score = score * finalOptions.multiplier;
+    score = Math.floor(score * finalOptions.multiplier);
 
     return {
         score,
