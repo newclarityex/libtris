@@ -15,6 +15,7 @@ export type Options = {
         'b2b': number;
     };
     comboTable: number[];
+    multiplier: number;
 }
 
 export const DEFAULT_OPTIONS: Options = {
@@ -34,4 +35,5 @@ export const DEFAULT_OPTIONS: Options = {
         'b2b': 1,
     },
     comboTable: [0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+    multiplier: 1,
 }

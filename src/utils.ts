@@ -310,6 +310,8 @@ export function calculateScore(scoreData: {
         clearName = 'Perfect Clear';
     }
 
+    score = score * finalOptions.multiplier;
+
     return {
         score,
         b2b: isB2bClear,
