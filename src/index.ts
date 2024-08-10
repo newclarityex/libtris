@@ -18,6 +18,7 @@ export type GameState = {
     canHold: boolean;
     combo: number;
     b2b: boolean;
+    rawScore: number;
     score: number;
     piecesPlaced: number;
     garbageCleared: number;
@@ -33,6 +34,7 @@ export type PublicGameState = {
     canHold: boolean;
     combo: number;
     b2b: boolean;
+    rawScore: number;
     score: number;
     piecesPlaced: number;
     garbageCleared: number;
@@ -84,6 +86,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
         combo: 0,
         canHold: true,
         b2b: false,
+        rawScore: 0,
         score: 0,
         piecesPlaced: 0,
         garbageCleared: 0,
@@ -92,7 +95,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
 }
 
 export function getPublicGameState(gameState: GameState): PublicGameState {
-    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, score, piecesPlaced, garbageCleared, dead } = gameState;
+    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, rawScore, score, piecesPlaced, garbageCleared, dead } = gameState;
     const newQueue = [...queue].splice(0, 6);
     return {
         board,
@@ -103,6 +106,7 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
         combo,
         canHold,
         b2b,
+        rawScore,
         score,
         piecesPlaced,
         garbageCleared,
@@ -439,7 +443,7 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
 
     const pc = checkPc(clearedBoard);
 
-    const { score, b2b, combo, clearName, allSpin } = calculateScore({
+    const { rawScore, score, b2b, combo, clearName, allSpin } = calculateScore({
         pc,
         linesCleared: cleared,
         isImmobile: newGameState.isImmobile,
@@ -450,6 +454,7 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
     newGameState.combo = combo;
     newGameState.b2b = b2b;
     newGameState.score += score;
+    newGameState.rawScore += rawScore;
     newGameState.piecesPlaced++;
 
     let attack = score;

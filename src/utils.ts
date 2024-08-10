@@ -231,6 +231,7 @@ export function calculateScore(scoreData: {
 }, options: Partial<Options> = {}): {
     clearName: ClearName | null;
     score: number;
+    rawScore: number;
     b2b: boolean;
     combo: number;
     allSpin: boolean;
@@ -239,16 +240,17 @@ export function calculateScore(scoreData: {
     const { linesCleared, isImmobile, b2b, combo, pc } = scoreData;
     const { attackTable, comboTable } = finalOptions;
 
-    let score = 0;
-    let isB2bClear = false;
-
     if (linesCleared === 0) return {
-        score,
+        score: 0,
+        rawScore: 0,
         b2b: b2b,
         combo: 0,
         clearName: null,
         allSpin: false,
     };
+
+    let rawScore = 0;
+    let isB2bClear = false;
 
     let newCombo = combo + 1;
     let clearName: ClearName | null = null;
@@ -259,37 +261,37 @@ export function calculateScore(scoreData: {
         isB2bClear = true;
         switch (linesCleared) {
             case 1:
-                score += attackTable.ass;
+                rawScore += attackTable.ass;
                 clearName = 'All-Spin Single';
                 break;
             case 2:
-                score += attackTable.asd;
+                rawScore += attackTable.asd;
                 clearName = 'All-Spin Double';
                 break;
             case 3:
-                score += attackTable.ast;
+                rawScore += attackTable.ast;
                 clearName = 'All-Spin Triple';
                 break;
         }
     } else {
         switch (linesCleared) {
             case 1:
-                score += attackTable.single;
+                rawScore += attackTable.single;
                 clearName = 'Single';
                 isB2bClear = false;
                 break;
             case 2:
-                score += attackTable.double;
+                rawScore += attackTable.double;
                 clearName = 'Double';
                 isB2bClear = false;
                 break;
             case 3:
-                score += attackTable.triple;
+                rawScore += attackTable.triple;
                 clearName = 'Triple';
                 isB2bClear = false;
                 break;
             case 4:
-                score += attackTable.quad;
+                rawScore += attackTable.quad;
                 clearName = 'Quad';
                 isB2bClear = true;
                 break;
@@ -297,23 +299,24 @@ export function calculateScore(scoreData: {
     }
 
     if (b2b && isB2bClear) {
-        score += attackTable.b2b;
+        rawScore += attackTable.b2b;
     }
 
     if (newCombo > 0) {
         let comboIndex = Math.min(newCombo - 1, comboTable.length - 1);
-        score += comboTable[comboIndex]!;
+        rawScore += comboTable[comboIndex]!;
     }
 
     if (pc) {
-        score = attackTable.pc;
+        rawScore = attackTable.pc;
         clearName = 'Perfect Clear';
     }
 
-    score = Math.floor(score * finalOptions.multiplier);
+    let score = Math.floor(rawScore * finalOptions.multiplier);
 
     return {
         score,
+        rawScore,
         b2b: isB2bClear,
         combo: newCombo,
         clearName,
