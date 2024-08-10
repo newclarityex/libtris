@@ -110,7 +110,7 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
     };
 }
 
-export type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold';
+export type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold' | 'none';
 export type GameEvent = {
     type: 'piece_placed';
     payload: {
@@ -247,6 +247,12 @@ export function executeCommand(gameState: GameState, command: Command, options: 
                 gameState: newGameState,
                 events,
             };
+        }
+        case 'none': {
+            return {
+                gameState: structuredClone(gameState),
+                events: [],
+            }
         }
     }
 }
