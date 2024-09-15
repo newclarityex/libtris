@@ -76,7 +76,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
 
     let bag = [...PIECES];
     const queue = initialBag ?? [];
-    while (queue.length < QUEUE_SIZE) {
+    while (queue.length < QUEUE_SIZE + 1) {
         let piece = bag.splice(Math.random() * bag.length, 1)[0]!;
         queue.push(piece);
         if (bag.length === 0) {
@@ -88,7 +88,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
 
     return {
         board,
-        bag: [],
+        bag,
         queue,
         garbageQueue: [],
         held: null,
@@ -516,10 +516,10 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
     newGameState.canHold = true;
 
     let addedQueue: Piece | null = null;
-    while (newGameState.queue.length < QUEUE_SIZE) {
+    if (newGameState.queue.length < QUEUE_SIZE) {
         let piece = newGameState.bag.splice(Math.random() * newGameState.bag.length, 1)[0]!;
         newGameState.queue.push(piece);
-        addedQueue = piece
+        addedQueue = piece;
         
         if (newGameState.bag.length === 0) {
             newGameState.bag = [...PIECES];
@@ -611,7 +611,7 @@ export function hold(gameState: GameState): { gameState: GameState, addedQueue: 
     newGameState.current = newPiece.newPieceData;
 
     let addedQueue: Piece | null = null;
-    while (newGameState.queue.length < QUEUE_SIZE) {
+    if (newGameState.queue.length < QUEUE_SIZE) {
         let piece = newGameState.bag.splice(Math.random() * newGameState.bag.length, 1)[0]!;
         newGameState.queue.push(piece);
         addedQueue = piece;
@@ -628,6 +628,6 @@ export function hold(gameState: GameState): { gameState: GameState, addedQueue: 
 }
 
 export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils.js';
-export type { PieceData, Block, ClearName, GarbageLine } from './utils.js';
+export type { Piece, PieceData, Block, ClearName, GarbageLine } from './utils.js';
 export type { Options } from './config.js';
 export { DEFAULT_OPTIONS } from './config.js';

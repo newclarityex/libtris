@@ -2,7 +2,7 @@
   "name": "libtris",
   "license": "MIT",
   "type": "module",
-  "version": "0.6.5",
+  "version": "0.6.7",
   "files": [
     "dist",
     "package.json"

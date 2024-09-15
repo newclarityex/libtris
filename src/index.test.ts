@@ -108,4 +108,14 @@ describe('game', () => {
         expect(gameState.board[0]?.some(block => block === "G")).toBe(true);
         expect(gameState.board[3]?.some(block => block === "G")).toBe(true);
     })
+    test('can place many pieces', () => {
+        let gameState = createGameState();
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
+    })
 })
