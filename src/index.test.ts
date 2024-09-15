@@ -104,6 +104,7 @@ describe('game', () => {
         gameState = queueGarbage(gameState, garbageIndices);
         expect(gameState.board[0]?.some(block => block === "G") ?? false).toBe(false);
         gameState = hardDrop(gameState).gameState;
+        gameState = hardDrop(gameState).gameState;
         expect(gameState.board[0]?.some(block => block === "G")).toBe(true);
         expect(gameState.board[3]?.some(block => block === "G")).toBe(true);
     })

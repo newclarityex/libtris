@@ -1,5 +1,5 @@
 import type { Block, GarbageLine, Piece, PieceData } from './utils.js';
-import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage } from './utils.js';
+import { PIECE_MATRICES, generateBag, checkCollision, placePiece, tryWallKicks, clearLines, checkImmobile, calculateScore, checkPc, addGarbage, PIECES } from './utils.js';
 import type { Options } from './config.js';
 import { DEFAULT_OPTIONS } from './config.js';
 import type { ClearName } from './utils.js';
@@ -10,6 +10,7 @@ export type PublicGarbageLine = {
 
 export type GameState = {
     board: Block[][];
+    bag: Piece[];
     queue: Piece[];
     garbageQueue: GarbageLine[];
     held: Piece | null;
@@ -27,6 +28,7 @@ export type GameState = {
 
 export type PublicGameState = {
     board: Block[][];
+    bag: Piece[];
     queue: Piece[];
     garbageQueued: PublicGarbageLine[];
     held: Piece | null;
@@ -67,17 +69,26 @@ function spawnPiece(board: Block[][], piece: Piece, options: Partial<Options> = 
     };
 }
 
+const QUEUE_SIZE = 6;
+
 export function createGameState(initialBag?: Piece[]): GameState {
     const board: Block[][] = [];
 
-    const queue = initialBag ?? generateBag();
-    if (queue.length < 6) {
-        queue.push(...generateBag());
+    let bag = [...PIECES];
+    const queue = initialBag ?? [];
+    while (queue.length < QUEUE_SIZE) {
+        let piece = bag.splice(Math.random() * bag.length, 1)[0]!;
+        queue.push(piece);
+        if (bag.length === 0) {
+            bag = [...PIECES];
+        };
     }
+
     const { newPieceData: current } = spawnPiece(board, queue.shift()!);
 
     return {
         board,
+        bag: [],
         queue,
         garbageQueue: [],
         held: null,
@@ -95,11 +106,12 @@ export function createGameState(initialBag?: Piece[]): GameState {
 }
 
 export function getPublicGameState(gameState: GameState): PublicGameState {
-    const { board, queue, garbageQueue, held, current, combo, canHold, b2b, rawScore, score, piecesPlaced, garbageCleared, dead } = gameState;
-    const newQueue = [...queue].splice(0, 6);
+    const { board, bag, queue, garbageQueue, held, current, combo, canHold, b2b, rawScore, score, piecesPlaced, garbageCleared, dead } = gameState;
+
     return {
         board,
-        queue: newQueue,
+        bag,
+        queue: queue.slice(0, QUEUE_SIZE),
         garbageQueued: garbageQueue.map(line => ({ delay: line.delay })),
         held,
         current,
@@ -116,6 +128,11 @@ export function getPublicGameState(gameState: GameState): PublicGameState {
 
 export type Command = 'move_left' | 'move_right' | 'sonic_left' | 'sonic_right' | 'drop' | 'sonic_drop' | 'hard_drop' | 'rotate_cw' | 'rotate_ccw' | 'hold' | 'none';
 export type GameEvent = {
+    type: 'queue_added';
+    payload: {
+        piece: Piece;
+    };
+} | {
     type: 'piece_placed';
     payload: {
         initial: PieceData;
@@ -194,7 +211,7 @@ export function executeCommand(gameState: GameState, command: Command, options: 
         }
         case 'hard_drop': {
             const initialPieceState = structuredClone(gameState.current);
-            const { gameState: newGameState, clear, tankedLines, finalPieceState } = hardDrop(gameState, finalOptions);
+            const { gameState: newGameState, clear, tankedLines, finalPieceState, addedQueue } = hardDrop(gameState, finalOptions);
             const events: GameEvent[] = [];
             events.push({
                 type: 'piece_placed',
@@ -214,6 +231,14 @@ export function executeCommand(gameState: GameState, command: Command, options: 
                     type: 'damage_tanked',
                     payload: {
                         holeIndices: tankedLines,
+                    },
+                });
+            }
+            if (addedQueue) {
+                events.push({
+                    type: 'queue_added',
+                    payload: {
+                        piece: addedQueue,
                     },
                 });
             }
@@ -240,8 +265,16 @@ export function executeCommand(gameState: GameState, command: Command, options: 
             };
         }
         case 'hold': {
-            const newGameState = hold(gameState);
+            const { gameState: newGameState, addedQueue } = hold(gameState);
             const events: GameEvent[] = [];
+            if (addedQueue) {
+                events.push({
+                    type: 'queue_added',
+                    payload: {
+                        piece: addedQueue,
+                    },
+                });
+            }
             if (newGameState.dead) {
                 events.push({
                     type: 'game_over',
@@ -417,7 +450,10 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
     } | null;
     tankedLines: number[];
     finalPieceState: PieceData;
+    addedQueue: Piece | null;
 } {
+    const finalOptions = { ...DEFAULT_OPTIONS, ...options };
+
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     let newGameState = structuredClone(gameState);
@@ -429,7 +465,7 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
 
     const finalPieceState = structuredClone(newGameState.current);
 
-    newGameState.board = placePiece(newGameState.board, newGameState.current, options);
+    newGameState.board = placePiece(newGameState.board, newGameState.current, finalOptions);
 
     const { board: clearedBoard, clearedLines } = clearLines(newGameState.board);
     const cleared = clearedLines.length;
@@ -449,7 +485,7 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
         isImmobile: newGameState.isImmobile,
         b2b: newGameState.b2b,
         combo: newGameState.combo,
-    }, options);
+    }, finalOptions);
 
     newGameState.combo = combo;
     newGameState.b2b = b2b;
@@ -467,7 +503,7 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
 
     let tankedLines: number[] = [];
     if (cleared === 0) {
-        let { newGameState: garbageGameState, expiredIndices } = processGarbage(newGameState, options);
+        let { newGameState: garbageGameState, expiredIndices } = processGarbage(newGameState, finalOptions);
         newGameState = garbageGameState;
         tankedLines = expiredIndices;
     };
@@ -479,8 +515,15 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
     newGameState.isImmobile = false;
     newGameState.canHold = true;
 
-    if (newGameState.queue.length < 6) {
-        newGameState.queue.push(...generateBag());
+    let addedQueue: Piece | null = null;
+    while (newGameState.queue.length < QUEUE_SIZE) {
+        let piece = newGameState.bag.splice(Math.random() * newGameState.bag.length, 1)[0]!;
+        newGameState.queue.push(piece);
+        addedQueue = piece
+        
+        if (newGameState.bag.length === 0) {
+            newGameState.bag = [...PIECES];
+        };
     }
 
     return {
@@ -498,7 +541,8 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
             clearedLines,
         } : null,
         tankedLines,
-        finalPieceState
+        finalPieceState,
+        addedQueue,
     };
 }
 
@@ -542,14 +586,14 @@ export function rotateCounterClockwise(gameState: GameState): GameState {
     return newGameState;
 }
 
-export function hold(gameState: GameState): GameState {
+export function hold(gameState: GameState): { gameState: GameState, addedQueue: Piece | null} {
     if (gameState.dead) throw new Error('Cannot act when dead');
 
     const newGameState = structuredClone(gameState);
     const { current, board, held, canHold } = newGameState;
 
     if (!canHold) {
-        return newGameState;
+        return { gameState: newGameState, addedQueue: null };
     }
 
     const newHeld = current.piece;
@@ -566,15 +610,21 @@ export function hold(gameState: GameState): GameState {
     newGameState.dead = newPiece.collides;
     newGameState.current = newPiece.newPieceData;
 
-    if (newGameState.queue.length < 6) {
-        newGameState.queue.push(...generateBag());
+    let addedQueue: Piece | null = null;
+    while (newGameState.queue.length < QUEUE_SIZE) {
+        let piece = newGameState.bag.splice(Math.random() * newGameState.bag.length, 1)[0]!;
+        newGameState.queue.push(piece);
+        addedQueue = piece;
+        if (newGameState.bag.length === 0) {
+            newGameState.bag = [...PIECES];
+        };
     }
 
     newGameState.held = newHeld;
     newGameState.canHold = false;
     newGameState.isImmobile = false;
 
-    return newGameState;
+    return { gameState: newGameState, addedQueue };
 }
 
 export { generateGarbage, getPieceMatrix, getBoardAvgHeight, getBoardHeights, getBoardBumpiness } from './utils.js';

@@ -6,7 +6,7 @@ export type Piece = 'I' | 'O' | 'J' | 'L' | 'S' | 'Z' | 'T';
 export type Block = Piece | null | 'G';
 export type ClearName = 'Single' | 'Triple' | 'Double' | 'Quad' | 'Perfect Clear' | 'All-Spin Single' | 'All-Spin Double' | 'All-Spin Triple';
 
-const PIECES: Piece[] = ['I', 'O', 'J', 'L', 'S', 'Z', 'T'];
+export const PIECES: Piece[] = ['I', 'O', 'J', 'L', 'S', 'Z', 'T'];
 
 export function generateBag() {
     const bag = [...PIECES];
