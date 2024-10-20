@@ -12,7 +12,7 @@ export type GameState = {
     board: Block[][];
     bag: Piece[];
     queue: Piece[];
-    garbageQueue: GarbageLine[];
+    garbageQueued: GarbageLine[];
     held: Piece | null;
     current: PieceData;
     isImmobile: boolean;
@@ -90,7 +90,7 @@ export function createGameState(initialBag?: Piece[]): GameState {
         board,
         bag,
         queue,
-        garbageQueue: [],
+        garbageQueued: [],
         held: null,
         current,
         isImmobile: false,
@@ -106,13 +106,13 @@ export function createGameState(initialBag?: Piece[]): GameState {
 }
 
 export function getPublicGameState(gameState: GameState): PublicGameState {
-    const { board, bag, queue, garbageQueue, held, current, combo, canHold, b2b, rawScore, score, piecesPlaced, garbageCleared, dead } = gameState;
+    const { board, bag, queue, garbageQueued, held, current, combo, canHold, b2b, rawScore, score, piecesPlaced, garbageCleared, dead } = gameState;
 
     return {
         board,
         bag,
         queue: queue.slice(0, QUEUE_SIZE),
-        garbageQueued: garbageQueue.map(line => ({ delay: line.delay })),
+        garbageQueued: garbageQueued.map(line => ({ delay: line.delay })),
         held,
         current,
         combo,
@@ -324,7 +324,7 @@ export function queueGarbage(gameState: GameState, holeIndices: number[], option
 
     let newGameState = structuredClone(gameState);
     let garbageLines = holeIndices.map(index => ({ index, delay: finalOptions.garbageDelay }));
-    newGameState.garbageQueue.push(...garbageLines);
+    newGameState.garbageQueued.push(...garbageLines);
 
     return newGameState;
 }
@@ -333,13 +333,13 @@ export function processGarbage(gameState: GameState, options: Partial<Options> =
     const finalOptions = { ...DEFAULT_OPTIONS, ...options };
     let newGameState = structuredClone(gameState);
 
-    let expiredLines = newGameState.garbageQueue.filter(line => line.delay <= 0);
-    newGameState.garbageQueue = newGameState.garbageQueue.filter(line => line.delay > 0);
+    let expiredLines = newGameState.garbageQueued.filter(line => line.delay <= 0);
+    newGameState.garbageQueued = newGameState.garbageQueued.filter(line => line.delay > 0);
 
     let expiredIndices = expiredLines.map(line => line.index);
     newGameState.board = addGarbage(newGameState.board, expiredIndices);
 
-    for (const line of newGameState.garbageQueue) {
+    for (const line of newGameState.garbageQueued) {
         line.delay -= 1;
     };
 
@@ -495,8 +495,8 @@ export function hardDrop(gameState: GameState, options: Partial<Options> = {}): 
 
     let attack = score;
     let cancelled = 0;
-    while (newGameState.garbageQueue.length > 0 && attack > 0) {
-        newGameState.garbageQueue.shift();
+    while (newGameState.garbageQueued.length > 0 && attack > 0) {
+        newGameState.garbageQueued.shift();
         attack -= 1;
         cancelled += 1;
     }
